@@ -1,0 +1,108 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use 5.010;
+
+our $VERSION = '0.00';
+
+use Getopt::Long;
+
+my ( $am_chocolate, $am_coffee, $am_caffeine );
+my ( $kj, $kcal, $protein, $carbohydrates, $fat );
+my ( $barweight, $pieces );
+
+GetOptions(
+	'chocolate=f'     => \$am_chocolate,
+	'coffee=f'        => \$am_coffee,
+	'caffeine=f'      => \$am_caffeine,
+	'kj=f'            => \$kj,
+	'kcal=f'          => \$kcal,
+	'protein=f'       => \$protein,
+	'carbohydrates=f' => \$carbohydrates,
+	'fat=f'           => \$fat,
+	'barweight=f'     => \$barweight,
+	'pieces=i'        => \$pieces,
+);
+
+if ( $kj and not $kcal ) {
+	$kcal = $kj * 0.2388459;
+}
+elsif ( $kcal and not $kj ) {
+	$kj = $kcal * 4.1868;
+}
+
+my $label_format = <<'EOF';
+Koffeinhaltige Schokolade
+
+Zutaten: Zartbitterschokolade,
+gemahlener Kaffee (%.f\%%), Koffein (%.f\%%)
+
+Nährwertangaben:\\
+\begin{tabular}{|l|r|r|r|}\hline
+& 100g & Tafel (%.fg) & Stück (%.1fg) \\\hline
+Brennwert [kJ/kcal] & %d / %d & %.f / %.f & %.f / %.f \\\hline
+Eiweiß [g] & %.1f & %.1f & %.1f \\\hline
+Kohlenhydrate [g] & %.1f & %.1f & %.1f \\\hline
+Fett [g] & %.1f & %.1f & %.1f \\\hline
+Koffein [mg] & %d & %d & %d \\\hline
+\end{tabular}
+
+EOF
+
+my $pieceweight = $barweight / $pieces;
+my $weight      = $am_chocolate + $am_coffee + $am_caffeine;
+my $pcfact      = $am_chocolate / $weight;
+my $barfact     = $barweight / 100 * $pcfact;
+my $piecefact   = $pieceweight / 100 * $pcfact;
+
+my $caffeine = $am_caffeine * 100 / $am_chocolate
+  + ( 0.035 * $am_coffee * 100 / $am_chocolate );
+
+my $label = sprintf( $label_format,
+	$am_coffee * 100 / $weight,
+	$am_caffeine * 100 / $weight,
+	$barweight,
+	$pieceweight,
+	$kj,
+	$kcal,
+	$kj * $barfact,
+	$kcal * $barfact,
+	$kj * $piecefact,
+	$kcal * $piecefact,
+	$protein * $pcfact,
+	$protein * $barfact,
+	$protein * $piecefact,
+	$carbohydrates * $pcfact,
+	$carbohydrates * $barfact,
+	$carbohydrates * $piecefact,
+	$fat * $pcfact,
+	$fat * $barfact,
+	$fat * $piecefact,
+	1000 * $caffeine * $pcfact,
+	1000 * $caffeine * $barfact,
+	1000 * $caffeine * $piecefact );
+
+my $output = <<'EOF';
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{parskip}
+\usepackage{tgheros}
+\renewcommand*\familydefault{\sfdefault}
+
+\setlength{\voffset}{-1in}
+\setlength{\hoffset}{-1in}
+\addtolength{\textheight}{+2in}
+\addtolength{\textwidth}{+2in}
+
+\begin{document}
+EOF
+
+for ( 1 .. 5 ) {
+	$output .= $label;
+}
+
+$output .= '\end{document}';
+
+say $output;
