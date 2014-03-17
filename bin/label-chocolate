@@ -40,7 +40,7 @@ gemahlener Kaffee (%.f\%%), Koffein (%.f\%%)
 
 Nährwertangaben:\\
 \begin{tabular}{|l|r|r|r|}\hline
-& 100g & Tafel (%.fg) & Stück (%.1fg) \\\hline
+& 100g & Tafel (ca. %.fg) & Stück (ca. %.1fg) \\\hline
 Brennwert [kJ/kcal] & %d / %d & %.f / %.f & %.f / %.f \\\hline
 Eiweiß [g] & %.1f & %.1f & %.1f \\\hline
 Kohlenhydrate [g] & %.1f & %.1f & %.1f \\\hline
